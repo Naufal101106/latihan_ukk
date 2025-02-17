@@ -1,7 +1,7 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ukk_2025/pages/Beranda.dart';
+import 'package:ukk_2025/Beranda.dart';
 
 class Login extends StatefulWidget {
   const Login({super.key});

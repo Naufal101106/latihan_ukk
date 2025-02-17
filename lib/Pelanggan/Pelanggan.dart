@@ -1,21 +1,23 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:ukk_2025/pages/Insert.dart';
+import 'package:ukk_2025/Pelanggan/InsertPelanggan.dart';
 
-class Produk extends StatefulWidget {
-  const Produk({super.key});
+class Pelanggan extends StatefulWidget {
+  const Pelanggan({super.key});
 
   @override
-  State<Produk> createState() => _ProdukState();
+  State<Pelanggan> createState() => _PelangganState();
 }
 
-class _ProdukState extends State<Produk> {
+class _PelangganState extends State<Pelanggan> {
+
   final SupabaseClient supabase = Supabase.instance.client;
   final _formkey = GlobalKey<FormState>();
 
   Future<List<Map<String, dynamic>>> fetchdata() async {
     try {
-      final response = await supabase.from('produk').select('NamaProduk, Harga, Stok');
+      final response = await supabase.from('pelanggan').select('NamaPelanggan, Alamat, NomorTelepon');
 
       return response as List<Map<String, dynamic>>;
     }catch (e) {
@@ -24,13 +26,14 @@ class _ProdukState extends State<Produk> {
     }
   }
 
+
   void showEditPopup(BuildContext context, Map<String, dynamic> item) {
-    TextEditingController namaController =
-        TextEditingController(text: item['NamaProduk']);
-    TextEditingController hargaController = 
-        TextEditingController(text: item['Harga'].toString());
-    TextEditingController stokController = 
-        TextEditingController(text: item['Stok'].toString());
+    TextEditingController namapelangganController =
+        TextEditingController(text: item['NamaPelanggan']);
+    TextEditingController alamatController = 
+        TextEditingController(text: item['Alamat']);
+    TextEditingController nomorteleponController = 
+        TextEditingController(text: item['NomorTelepon']);
 
       showDialog(
         context: context, 
@@ -38,40 +41,39 @@ class _ProdukState extends State<Produk> {
           return Form(
             key: _formkey,
             child: AlertDialog(
-              title: Text('Edit Produk'),
+              title: Text('Edit Pelanggan'),
               content: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
                     TextFormField(
-                      controller: namaController,
-                      decoration: InputDecoration(label: Text('Nama Produk')),
+                      controller: namapelangganController,
+                      decoration: InputDecoration(label: Text('Nama Pelanggan')),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Masukkan Nama Produk!';
+                          return 'Masukkan Nama Pelanggan!';
                         }
                         return null;
                       },
                     ),
             
                     TextFormField(
-                      controller: hargaController,
-                      decoration: InputDecoration(label: Text('Harga')),
-                      keyboardType: TextInputType.number,
+                      controller: alamatController,
+                      decoration: InputDecoration(label: Text('Alamat')),
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Masukkan Harga!';
+                          return 'Masukkan Alamat!';
                         }
                         return null;
                       },
                     ),
             
                     TextFormField(
-                      controller: stokController,
-                      decoration: InputDecoration(label: Text('Stok')),
+                      controller: nomorteleponController,
+                      decoration: InputDecoration(label: Text('Nomor Telepon')),
                       keyboardType: TextInputType.number,
                       validator: (value) {
                         if (value == null || value.isEmpty) {
-                          return 'Masukkan Stok!';
+                          return 'Masukkan Nomor Telepon!';
                         }
                         return null;
                       },
@@ -86,23 +88,22 @@ class _ProdukState extends State<Produk> {
                   ),
             
                   ElevatedButton(
-                    onPressed: () async {
-                      await supabase.from('produk').update({
-                        'NamaProduk' : namaController.text,
-                        'Harga' : int.parse(hargaController.text),
-                        'Stok' : int.parse(stokController.text),
-                      }).eq('NamaProduk', item['NamaProduk']);
+  onPressed: () async {
+    if (_formkey.currentState!.validate()) {
+      // Lakukan update setelah validasi berhasil
+      await supabase.from('pelanggan').update({
+        'NamaPelanggan': namapelangganController.text,
+        'Alamat': alamatController.text,
+        'NomorTelepon': nomorteleponController.text,
+      }).eq('NamaPelanggan', item['NamaPelanggan']);
 
-                      if (_formkey.currentState!.validate()) {
-                        Navigator.pop(context);
-                        setState(() {
-                          
-                        });
-                      }
-                      
-                    }, 
-                    child: Text('simpan') 
-                    )
+      Navigator.pop(context); // Menutup dialog setelah update berhasil
+      setState(() {}); // Memperbarui tampilan
+    }
+  },
+  child: Text('Simpan')
+)
+
               ],
             ),
           );
@@ -118,12 +119,11 @@ class _ProdukState extends State<Produk> {
           onPressed: () async {
             final result = await Navigator.push(
               context, 
-                MaterialPageRoute(builder: (context) => Insert())
+                MaterialPageRoute(builder: (context) => Insertpelanggan())
             );
             if (result == true);
-            Produk();
+            Pelanggan();
           },
-
           style: ElevatedButton.styleFrom(
             backgroundColor: Color.fromARGB(255, 3, 186, 247),
             shape: RoundedRectangleBorder(
@@ -139,18 +139,24 @@ class _ProdukState extends State<Produk> {
       ),
 
       appBar: AppBar(
-        title: TextField(
-          decoration: InputDecoration(
-            hintText: 'Cari',
-            prefixIcon: Icon(Icons.search),
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(10),
+        title: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            padding: EdgeInsets.only(left: 28),
+            child: Container(
+              width: MediaQuery.of(context).size.width - 40,
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Cari',
+                  prefixIcon: Icon(Icons.search),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(10)
+                  )
+                ),
+              ),
             ),
-            hintStyle: TextStyle(
-              color: Colors.black87
-            )
           ),
-        )
+        ),
       ),
 
       body: FutureBuilder(
@@ -172,7 +178,7 @@ class _ProdukState extends State<Produk> {
                   margin: EdgeInsets.all(10),
                   child: ListTile(
                     title: Text(
-                      item['NamaProduk'],
+                      item['NamaPelanggan'],
                       style: TextStyle(
                         fontWeight: FontWeight.bold, fontSize: 20
                       ),
@@ -180,8 +186,8 @@ class _ProdukState extends State<Produk> {
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('Harga : Rp ${item['Harga']}'),
-                        Text('Stok : ${item['Stok']}'),
+                        Text('Alamat :  ${item['Alamat']}'),
+                        Text('Nomor Telepon : ${item['NomorTelepon']}'),
                       ],
                     ),
                     trailing: Row(
@@ -206,6 +212,7 @@ class _ProdukState extends State<Produk> {
           }
         }
       ),
+
     );
   }
 }
